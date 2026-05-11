@@ -1,0 +1,639 @@
+:root {
+  --bg: #0a0d12;
+  --bg-elev: #11151c;
+  --bg-card: #141923;
+  --border: #1f2632;
+  --border-bright: #2a3340;
+  --text: #e8ecf2;
+  --text-dim: #8590a4;
+  --text-faint: #4a5468;
+  --accent: #d4a574;
+  --accent-dim: #8b6f4a;
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --blue: #60a5fa;
+  --grid-line: rgba(255,255,255,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.brand { display: flex; flex-direction: column; gap: 4px; }
+
+.brand-name {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.brand-name .dot { color: var(--accent); }
+
+.brand-sub {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.status { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.timestamp { color: var(--text-faint); font-size: 10px; }
+
+/* Metrics */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.metric {
+  background: var(--bg-card);
+  padding: 18px 20px;
+  position: relative;
+  cursor: default;
+  transition: background 0.18s;
+}
+.metric:hover { background: #161b25; }
+
+/* ── Metric hover tooltips ────────────────────────────────────────────────── */
+
+@keyframes tipFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.metric-tip {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: -1px;
+  min-width: 250px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-bright);
+  padding: 11px 14px;
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.65;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+  z-index: 100;
+  animation: tipFadeIn 0.14s ease;
+  pointer-events: none;
+}
+
+/* right-aligned for the last two cards */
+.metric-tip.tip-right { left: auto; right: -1px; }
+
+.metric-tip-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.metric-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.metric-value.pos { color: var(--green); }
+.metric-value.neg { color: var(--red); }
+
+.metric-delta { font-size: 11px; color: var(--text-dim); }
+.metric-delta .arrow.up { color: var(--green); }
+.metric-delta .arrow.down { color: var(--red); }
+
+/* Main grid */
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.panel-title .accent { color: var(--accent); }
+
+.panel-actions {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.panel-actions span {
+  cursor: pointer;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.panel-actions span:hover { color: var(--accent); border-color: var(--accent-dim); }
+.panel-actions span.active { color: var(--accent); border-color: var(--accent-dim); }
+
+.panel-body { padding: 20px; }
+
+/* Chart */
+.chart-wrap {
+  position: relative;
+  height: 336px;
+  margin-bottom: 0;
+}
+
+/* Remove recharts default background */
+.recharts-wrapper { background: transparent !important; }
+.recharts-surface { overflow: visible; }
+
+/* Positions table */
+.table { width: 100%; border-collapse: collapse; font-size: 11px; }
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th.right { text-align: right; }
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.table td.right { text-align: right; }
+.table td.pos { color: var(--green); }
+.table td.neg { color: var(--red); }
+
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: rgba(212, 165, 116, 0.03); }
+
+.ticker { font-weight: 600; letter-spacing: 0.02em; }
+
+.side {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  border: 1px solid;
+}
+
+.side.long { color: var(--green); border-color: rgba(74, 222, 128, 0.3); }
+.side.short { color: var(--red); border-color: rgba(248, 113, 113, 0.3); }
+
+/* Signal log */
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-entry:last-child { border-bottom: none; padding-bottom: 0; }
+
+.log-time { font-size: 10px; color: var(--text-faint); padding-top: 2px; }
+
+.log-content { display: flex; flex-direction: column; gap: 4px; }
+
+.log-headline {
+  font-size: 11px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-tag {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 1px 6px;
+  border: 1px solid var(--border-bright);
+  color: var(--text-dim);
+}
+
+.log-tag.macro   { color: var(--blue);   border-color: rgba(96,  165, 250, 0.3); }
+.log-tag.release { color: var(--yellow); border-color: rgba(251, 191,  36, 0.3); }
+.log-tag.bayes   { color: var(--accent); border-color: var(--accent-dim); }
+.log-tag.copom   { color: #c084fc;       border-color: rgba(192, 132, 252, 0.3); }
+
+.log-detail { font-size: 10px; color: var(--text-dim); }
+
+/* Bayesian beliefs */
+.belief { display: flex; flex-direction: column; gap: 8px; }
+
+.belief-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.belief-bar {
+  height: 24px;
+  background: var(--bg-elev);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+}
+
+.belief-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  opacity: 0.4;
+  transition: width 0.4s ease;
+}
+
+.belief-value {
+  position: relative;
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1;
+}
+
+/* number flashes gold briefly when belief updates */
+@keyframes beliefValueFlash {
+  0%   { color: var(--accent); text-shadow: 0 0 10px rgba(212,165,116,0.55); transform: scale(1.1); }
+  100% { color: inherit;       text-shadow: none;                             transform: scale(1); }
+}
+.belief-value-changed {
+  animation: beliefValueFlash 0.5s ease-out forwards;
+  display: inline-block;
+}
+
+/* directional arrow — appears then fades out over 4s */
+@keyframes beliefArrow {
+  0%   { opacity: 0; transform: translateY(3px); }
+  12%  { opacity: 1; transform: translateY(0); }
+  72%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.belief-arrow {
+  position: relative;
+  z-index: 1;
+  font-size: 8px;
+  margin-left: 7px;
+  animation: beliefArrow 4s ease forwards;
+}
+.belief-arrow.up   { color: var(--green); }
+.belief-arrow.down { color: var(--red); }
+
+/* inline delta text in the note line */
+.note-up   { color: var(--green); }
+.note-down { color: var(--red); }
+
+.belief-note { font-size: 10px; color: var(--text-dim); }
+
+/* Info bar */
+.info-bar {
+  margin-top: 24px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-bar span { display: flex; gap: 8px; align-items: center; }
+.info-bar .sep { color: var(--border-bright); }
+.info-bar .v { color: var(--text-dim); }
+
+/* ── Modals ───────────────────────────────────────────────────────────────── */
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 13, 18, 0.82);
+  z-index: 200;
+  animation: overlayFadeIn 0.18s ease;
+}
+
+/* Position detail — side panel */
+.modal-side {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 440px;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-bright);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: slideInRight 0.22s ease-out;
+}
+
+/* Belief / Event — centered */
+.modal-center-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  animation: modalScaleIn 0.18s ease-out;
+}
+
+/* Shared header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.modal-close {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.modal-close:hover { color: var(--text); border-color: var(--border-bright); }
+
+/* Section */
+.modal-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-section:last-child { border-bottom: none; }
+
+.modal-section-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+}
+
+/* Stats */
+.modal-stat-row { display: flex; gap: 0; }
+
+.modal-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.modal-stat-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.modal-stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Entry signal */
+.modal-entry-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.modal-entry-text {
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.55;
+}
+
+.modal-entry-driver {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Row hover cue for clickable rows */
+.table tr[style*="cursor: pointer"]:hover td {
+  background: rgba(212, 165, 116, 0.06);
+}
+
+/* Misc */
+.callout {
+  position: absolute;
+  top: 14px;
+  right: 20px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.divider-h { height: 1px; background: var(--border); margin: 20px 0; }
+
+.log::-webkit-scrollbar { width: 6px; }
+.log::-webkit-scrollbar-track { background: var(--bg-elev); }
+.log::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+/* ── Evidence stream slide-in ─────────────────────────────────────────────── */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    background-color: rgba(74, 222, 128, 0.06);
+  }
+  35% {
+    background-color: rgba(74, 222, 128, 0.06);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: transparent;
+  }
+}
+
+.log-entry {
+  /* smooth push-down when a new entry is prepended above */
+  transition: transform 0.35s ease;
+}
+
+.log-entry-new {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+/* ── Live price flash animations ──────────────────────────────────────────── */
+
+@keyframes priceFlashUp {
+  0%   { color: var(--green); text-shadow: 0 0 10px rgba(74, 222, 128, 0.7); }
+  55%  { color: var(--green); text-shadow: 0 0 4px  rgba(74, 222, 128, 0.3); }
+  100% { color: inherit;      text-shadow: none; }
+}
+
+@keyframes priceFlashDown {
+  0%   { color: var(--red); text-shadow: 0 0 10px rgba(248, 113, 113, 0.7); }
+  55%  { color: var(--red); text-shadow: 0 0 4px  rgba(248, 113, 113, 0.3); }
+  100% { color: inherit;    text-shadow: none; }
+}
+
+.flash-up   { animation: priceFlashUp   0.8s ease-out forwards; }
+.flash-down { animation: priceFlashDown 0.8s ease-out forwards; }
