@@ -1,48 +1,40 @@
 import { useState, useEffect, useRef } from 'react'
 
-// ── direction inference ────────────────────────────────────────────────────────
-// Parse the event text to guess whether the belief should move up or down,
-// rather than pure random — makes the stream feel causally consistent.
 function inferDelta(event) {
-  const mag = +(0.03 + Math.random() * 0.05).toFixed(2)   // 0.03 – 0.08
-
+  const mag = +(0.03 + Math.random() * 0.05).toFixed(2)
   if (event.type === 'macro') {
-    // "+Xpp" → risk-on increases, "-Xpp" → decreases
     const up   = /\+\d+pp/.test(event.detail)
     const down = /-\d+pp/.test(event.detail)
-    const positive = up ? true : down ? false : Math.random() > 0.45
-    return positive ? mag : -mag
+    return (up ? true : down ? false : Math.random() > 0.45) ? mag : -mag
   }
-
-  if (event.type === 'copom') {
-    const positive = /hawkish/i.test(event.headline)
-    return positive ? mag : -mag
-  }
-
+  if (event.type === 'copom') return /hawkish/i.test(event.headline) ? mag : -mag
   return Math.random() > 0.5 ? mag : -mag
 }
 
 function clamp(v) { return Math.max(0.05, Math.min(0.96, v)) }
 
-// belief index mapping
-const TRIGGER = {
-  macro:  0,   // Macro Regime · Risk-On
-  copom:  1,   // Política Monetária · Hawkish
-}
-
-const ARROW_TTL = 4_000   // ms the arrow stays visible
+const TRIGGER = { macro: 0, copom: 1 }
+const ARROW_TTL = 4_000
 
 export function useLiveBeliefs(initialBeliefs, events) {
-  const [beliefs, setBeliefs] = useState(() =>
-    (initialBeliefs ?? []).map(b => ({ ...b, delta: null, changed: false }))
-  )
+  // FIX: start empty — populated when data arrives
+  const [beliefs, setBeliefs] = useState([])
 
   const seenId  = useRef(null)
+  const seeded  = useRef(false)
   const timers  = useRef([])
 
+  // FIX: initialize from JSON as soon as data loads
+  useEffect(() => {
+    if (!initialBeliefs?.length || seeded.current) return
+    seeded.current = true
+    setBeliefs(initialBeliefs.map(b => ({ ...b, delta: null, changed: false })))
+  }, [initialBeliefs])
+
+  // react to incoming events
   useEffect(() => {
     const latest = events?.[0]
-    if (!latest?.isNew)              return
+    if (!latest?.isNew)               return
     if (latest.id === seenId.current) return
     seenId.current = latest.id
 
@@ -56,7 +48,6 @@ export function useLiveBeliefs(initialBeliefs, events) {
       return { ...b, value: clamp(+(b.value + delta).toFixed(2)), delta, changed: true }
     }))
 
-    // fade out the arrow after TTL
     const t = setTimeout(() => {
       setBeliefs(prev => prev.map((b, i) =>
         i === targetIdx ? { ...b, delta: null, changed: false } : b
@@ -65,7 +56,6 @@ export function useLiveBeliefs(initialBeliefs, events) {
     timers.current.push(t)
   }, [events])
 
-  // cleanup on unmount
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
   return beliefs
