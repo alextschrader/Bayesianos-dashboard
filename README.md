@@ -35,10 +35,35 @@ O dashboard é uma interface de monitoramento em tempo real dessas crenças e da
 | **Evidence Stream** | Feed de eventos bayesianos gerado a cada 8–15s com slide-in animation |
 | **Posterior Beliefs** | 4 beliefs de regime com barras animadas reagindo a eventos macro/copom |
 
-### Interações
-- **Clique em posição** → painel lateral com mini chart de preço (Brownian bridge), razão da entrada e histórico de confiança
-- **Clique em belief** → sparkline dos últimos 30 dias com stats
-- **Clique em evento** → análise de impacto no modelo bayesiano
+### Interações por clique
+
+**Linha de posição** → painel lateral deslizando da direita com:
+- Mini chart de preço (Brownian bridge entre entry e last — determinístico por ticker via LCG seed)
+- Razão da entrada: qual evento bayesiano gerou a posição (pair trade, posterior update, macro, momentum)
+- Histórico de confiança ao longo do tempo — line chart azul convergindo para o valor atual
+
+**Belief de regime** → modal centralizado com:
+- Sparkline dos últimos 30 dias derivada do valor atual
+- Stats: mínimo, médio, máximo, valor atual, tendência ▲/▼
+
+**Evento do feed** → modal com análise de impacto:
+- `macro` → mostra a belief "Macro Regime · Risk-On" com barra animada e delta ao vivo
+- `copom` → mostra "Política Monetária · Hawkish" da mesma forma
+- `bayes` / `release` → explica que afeta posteriors individuais, não o regime macro
+
+Fechar: `ESC` ou clique fora do modal.
+
+### Detalhes vivos
+
+- **Status dot** — pulse verde contínuo no header (`@keyframes pulse`)
+- **Timestamp** — atualiza segundo a segundo em tempo real
+- **Hover nas métricas** — tooltip explicativo em cada uma das 6 cards:
+  - P&L Acumulado: base de cálculo YTD, net de custos
+  - Sharpe: fórmula (R_p − R_f) / σ_p × √252
+  - Max Drawdown: definição pico-a-vale
+  - Beta IBOV: o que significa 0.31 e o target do modelo
+  - Posições Ativas: Kelly Criterion bayesiano f* = (p·b − q) / b
+  - Turnover Mensal: giro estimado + custo mensal
 
 ---
 
