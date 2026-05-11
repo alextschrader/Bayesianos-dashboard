@@ -6,6 +6,8 @@ Dashboard interativo de um robô bayesiano operando na B3. Construído em React 
 
 ![stack](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react) ![stack](https://img.shields.io/badge/Vite-5-646cff?style=flat-square&logo=vite) ![stack](https://img.shields.io/badge/Recharts-2-22b5bf?style=flat-square) ![stack](https://img.shields.io/badge/Python-3.12-3776ab?style=flat-square&logo=python)
 
+**[bayesianos-dashboard.vercel.app](https://bayesianos-dashboard.vercel.app/)**
+
 ---
 
 ## O que é
